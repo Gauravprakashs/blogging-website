@@ -1,29 +1,44 @@
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import { Link, useMatch, useNavigate } from "react-router-dom";
+import axios from "axios";   //to make a network request
+import { useAuth } from "../components/hooks";
+
+
+
 
 function Auth() {
   const isRegister = useMatch("/register");
   // console.log(isRegister)
 const navigate  = useNavigate();
+const {login}=useAuth();
+//this function will run whem the form is submitted
   async function onSubmit(values, actions){
 
     console.log('onSubmit',{values, actions})
 
     try {
 
-        // api request to login
-        console.log('User logged in ')
+ // api request to login
+      const {data}=await axios.post(`http://localhost:3001/api/users${isRegister ? '':'/login'}`,{user:values})
+   
 
         //navigate the user back to home page
+         login(data.user);
         navigate('/');
 
         
     } catch (error) {
         console.log('Error while onSubmit: ',error)
+        const {status,data}=error.response;
+        if(status===422){
+          actions.setErrors(data.errors);
+        }
     }
 
   }
+
+
   const loginInitialValues = {email:'', password: ''};
 
   return (
