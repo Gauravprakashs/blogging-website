@@ -20,7 +20,7 @@ const {login}=useAuth();
     try {
 
  // api request to login
-      const {data}=await axios.post(`http://localhost:3001/api/users${isRegister ? '':'/login'}`,{user:values})
+          
    
 
         //navigate the user back to home page

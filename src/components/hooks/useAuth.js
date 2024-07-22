@@ -1,7 +1,9 @@
 
 
+import axios from "axios";
+import { isEmpty } from "lodash-es";
 import React from "react";
-import {proxy,useSnapshot} from 'valtio'
+import {proxy,useSnapshot,snapshot} from 'valtio'
 
 function getAuthUser(){
     const jwt=window.localStorage.getItem('jwtToken');
@@ -13,15 +15,17 @@ const state=proxy(
     {
         useAuth:getAuthUser(),
     },
-    {
-        isAuth:true
-    }
 );
+const isAuth=snapshot(state)
+
 const actions={
     login:(user)=>{
         console.log('login',{user});
         state.authUser=user;
         window.localStorage.setItem('jwtToken',btoa(JSON.stringify(state.authUser)))
+        
+
+        axios.defaults.headers.Authorization=`Token ${state.authUser.token}`;
     },
     logout:()=>{
         state.authUser={};
@@ -33,9 +37,12 @@ const actions={
 function useAuth(){
     const snap=useSnapshot(state);
     console.log('snap',{snap})
+
+    const getAuthStatus=()=>!isEmpty(snap.authUser);
     return{
         ...snap,
-        ...actions
+        ...actions,
+        isAuth:getAuthStatus()
     }
 }
 
