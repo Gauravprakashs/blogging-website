@@ -3,6 +3,8 @@ import { Formik, Field, Form } from "formik";
 import React from "react";
 import { useAuth, useUserQuery } from "../components/hooks";
 import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 
 function Settings() {
@@ -16,16 +18,25 @@ function Settings() {
         currentUserError,
     } = useUserQuery();
 
+    const queryClient=useQueryClient();
+    const navigate=useNavigate();
+
     console.log('Settings',{ isCurrentUserLoading,
         currentUser,
         currentUserError,})
 
     async function onSubmit(values,{setErrors}){
         try{
-            const {data}=await axios.put('/user',{user:values});
+            const {data}=await axios.put('http://localhost:3001/api/user',{user:values});
 
             const updateUsername=data?.user?.username;
             logout(data?.user);
+
+            queryClient.invalidateQueries(`/profiles/${updatedUsername}`);
+            queryClient.invalidateQueries(`/user`);
+
+            navigate(`/profile/${updateUsername}`);
+
         }catch(error){
             const {status,data}=error.response;
 
@@ -97,7 +108,10 @@ function Settings() {
                                         </fieldset>
                                     </Form>
                                     <hr />
-                                    <button onClick={() => logout()} type="button" className="btn btn-outline-danger">
+                                    <button onClick={() => {
+                                        logout(); 
+                                        navigate('/');
+                                        }} type="button" className="btn btn-outline-danger">
                                         Click to Logout
                                     </button>
                                 </>

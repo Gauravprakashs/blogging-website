@@ -1,11 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { AuthRoute, GuestRoute, Navbar, Settings } from "./components";  /* to save lines-*/
+import { Article, AuthRoute, Editor, GuestRoute, Navbar, Settings } from "./components";  /* to save lines-*/
 import { Auth } from "./pages";
 import Home from "./pages/Home";
+import axios from "axios";
 
 function App() {
+
+  useEffect(()=>{
+    const jwt=window.localStorage.getItem('jwtToken');
+    if(!jwt) return{}
+
+    const parsedJwt=JSON.parse(atob(jwt));
+    console.log(`parsedJWT`,{parsedJwt})
+    axios.defaults.headers.Authorization=`Token ${parsedJwt.token}`
+  },[]);
+
   return (
     <Router>
       <div>
@@ -26,10 +37,10 @@ function App() {
               <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="/editor" element={<AuthRoute />}>
-              <Route path="/editor" element={<h1>Editor </h1>} />
+              <Route path="/editor" element={<Editor/>} />
             </Route>
             <Route path="/editor/:slug" element={<h1>Editor </h1>} />
-            <Route path="/article/:slug" element={<h1>Article </h1>} />
+            <Route path="/article/:slug" element={<Article/>} />
             <Route path="/profile/:username" element={<h1>Profile </h1>} />
             <Route path="/@:username" element={<AuthRoute />}>
               <Route path="/@:username" element={<h1>Profile </h1>} />
